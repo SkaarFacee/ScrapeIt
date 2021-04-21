@@ -13,8 +13,9 @@ def headless():
     return options
 
 def startDriver():
+    driver=webdriver.Edge()
     #driver = webdriver.Firefox(executable_path='/home/skaarface/Apps/WebDrivers/geckodriver')
-    driver = webdriver.Firefox(options=headless(),executable_path='/home/skaarface/Apps/WebDrivers/geckodriver')
+    #driver = webdriver.Firefox(options=headless(),executable_path='/home/skaarface/Apps/WebDrivers/geckodriver')
     driver.get('https://www.91mobiles.com/phonefinder.php')
     return driver
 
