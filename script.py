@@ -1,5 +1,7 @@
-from selenium import webdriver
 import time
+import json
+from secret import siteUrl
+from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,10 +15,9 @@ def headless():
     return options
 
 def startDriver():
-    driver=webdriver.Edge()
     #driver = webdriver.Firefox(executable_path='/home/skaarface/Apps/WebDrivers/geckodriver')
-    #driver = webdriver.Firefox(options=headless(),executable_path='/home/skaarface/Apps/WebDrivers/geckodriver')
-    driver.get('https://www.91mobiles.com/phonefinder.php')
+    driver = webdriver.Firefox(options=headless(),executable_path='/home/skaarface/Apps/WebDrivers/geckodriver')
+    driver.get(siteUrl+'phonefinder.php')
     return driver
 
 def shutDown(driver):
@@ -27,13 +28,12 @@ def scrollToEnd(driver):
     return
 
 def nextListPage(driver):
-    print(type(driver.find_element_by_xpath("//div[contains(@class, 'listing-btns4')]").is_enabled()))
     driver.find_element_by_xpath("//div[contains(@class, 'listing-btns4')]").click()
 
+
 def isPageReady(driver,num):
-    delay = 3
     try:
-        WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-row="{}"]'.format(num))))
+        WebDriverWait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-row="{}"]'.format(num))))
         return True
     except TimeoutException:
         return True
@@ -41,40 +41,42 @@ def isPageReady(driver,num):
 def getRow(driver):
     return driver.find_element_by_xpath("//div[contains(@class, 'filter-grey-bar')]")
 
-def getName(elems):
-    return elems.find_element_by_xpath("//a[@class='hover_blue_link name gaclick']").text
+def getNames(driver):
+    return driver.find_elements_by_xpath("//a[@class='hover_blue_link name gaclick']")
 
-def getSpecLink(elems):
-    return elems.find_element_by_xpath("//div[contains(@class, 'compare3')]").click()
+def getlinks(driver):
+    fin,flag=[],0
+    for i in driver.find_elements_by_xpath("//span[contains(@class,'blue target_link_new_tab gaclick')]"):
+        if flag%2!=0:
+            fin.append(i.get_attribute('data-href-url'))
+        flag+=1
+    return fin
 
+def makeList(items,getNames,driver):
+    temp=[name.text for name in getNames(driver)]
+    return temp
 
-
-
-
-def getRows(driver):
-    return [item for item in driver.find_elements_by_xpath("//div[contains(@class, 'filter-grey-bar')]")]
-
-
-"""
-def makeList(names,getNames,driver):
-    [names.append(name.text) for name in getNames(driver)]
-    return
-
-
-
-"""
 
 driver=startDriver()
-names,row_num=[],14
-scrollToEnd(driver) 
-time.sleep(3)
-if isPageReady(driver,23):
-    print(getName(getRow(driver)))
-    getSpecLink(getRow(driver))
-    
+row_num=14
+names,links=[],[]
+try:
+    while row_num<=4800:
+        scrollToEnd(driver)
+        if isPageReady(driver, row_num):
+            time.sleep(2)
+            names+=makeList(names, getNames, driver)
+            links+=getlinks(driver)
+            time.sleep(2)
+            nextListPage(driver)
+        row_num+=10    
+        print("---"+str(row_num)+"---") 
+except:
+    print("Last page")
+print("---DONE---")
 
-
-# TODO: Go into page
-
-
+spider = dict(zip(names, links))
+#print(spider)
+with open("file.json","w") as op:
+    json.dump(spider, op)
 shutDown(driver)
