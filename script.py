@@ -77,6 +77,6 @@ print("---DONE---")
 
 spider = dict(zip(names, links))
 #print(spider)
-with open("file.json","w") as op:
+with open("outputs/step1.json","w") as op:
     json.dump(spider, op)
 shutDown(driver)
