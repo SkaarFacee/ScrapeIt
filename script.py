@@ -58,11 +58,12 @@ def makeList(items,getNames,driver):
 
 
 driver=startDriver()
-row_num=14
+row_num=20
 names,links=[],[]
 try:
-    while row_num<=1500:
+    while row_num<=300:
         scrollToEnd(driver)
+        time.sleep(2)
         if isPageReady(driver, row_num):
             time.sleep(2)
             names+=makeList(names, getNames, driver)
@@ -77,6 +78,6 @@ print("---DONE---")
 
 spider = dict(zip(names, links))
 #print(spider)
-with open("outputs/step1.json","w") as op:
+with open("outputs/step1_part_a.json","w") as op:
     json.dump(spider, op)
 shutDown(driver)
