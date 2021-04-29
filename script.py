@@ -61,7 +61,7 @@ driver=startDriver()
 row_num=20
 names,links=[],[]
 try:
-    while row_num<=300:
+    while row_num<=4300:
         scrollToEnd(driver)
         time.sleep(2)
         if isPageReady(driver, row_num):
